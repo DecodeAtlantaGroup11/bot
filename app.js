@@ -5,6 +5,7 @@ var builder = require('botbuilder');
 var restify = require('restify');
 var Store = require('./store');
 var spellService = require('./spell-service');
+var request = require('request');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -26,6 +27,28 @@ var bot = new builder.UniversalBot(connector, function (session) {
 // This Url can be obtained by uploading or creating your model from the LUIS portal: https://www.luis.ai/
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
 bot.recognizer(recognizer);
+
+bot.dialog('HelloWorld', function (session, args) {
+    session.send('Hi there! Wait a sec while I try repeating your name...');
+    var nameEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'Name');
+    if (nameEntity) {
+        // nameEntity entity detected, continue to next step
+        request('https://prod-25.eastus.logic.azure.com/workflows/14d0db12e3e34d1a8f905487b8634f61/triggers/manual/paths/invoke/hello/' + nameEntity.entity + '?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=D-EJcdNi2P5loUwH6W0A6eA-EJvxdlUH6lMFKYTYWO8', function (error, response, body) {
+            session.send(JSON.parse(body).result);
+        });
+    }
+}).triggerAction({
+    matches: 'HelloWorld'
+});
+
+bot.dialog('TestHelloWorld', function (session) {
+    session.send('Hi there! Wait a sec while I try helloing your world...');
+    request('https://prod-24.eastus.logic.azure.com/workflows/7ee7b1f417c04c24afa7cb5b24b68d2e/triggers/manual/paths/invoke/hi?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=6_KlmKq1RoFU85VOa-VWwp4hFCQ82yleOXMswvpEglY', function (error, response, body) {
+        session.send(JSON.parse(body).result);
+    });
+}).triggerAction({
+    matches: 'TestHelloWorld'
+});
 
 bot.dialog('SearchHotels', [
     function (session, args, next) {

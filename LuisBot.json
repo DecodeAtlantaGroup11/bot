@@ -15,6 +15,9 @@
     },
     {
       "name": "Help"
+    },
+    {
+      "name": "HelloWorld"
     }
   ],
   "entities": [
@@ -23,6 +26,9 @@
     },
     {
       "name": "AirportCode"
+    },
+    {
+      "name": "name"
     }
   ],
   "composites": [],
